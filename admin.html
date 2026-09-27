@@ -130,17 +130,11 @@
                 actionBtn.disabled = true;
                 actionBtn.textContent = 'FETCHING ENTRIES...';
 
-                // Optional: Filter by today's date if desired for the daily draw
-                const today = new Date().toISOString().split('T')[0];
-                const startOfDay = `${today}T00:00:00`;
-
-                const { data, error } = await supabaseClient
-                    .from('expo_leads')
-                    .select('*')
-                    .gte('created_at', startOfDay);
+                // Fetches all entries without date restrictions
+                const { data, error } = await supabaseClient.from('expo_leads').select('*');
 
                 if (error || !data || data.length === 0) {
-                    alert('No entries found for today!');
+                    alert('No entries found in database!');
                     actionBtn.disabled = false;
                     actionBtn.textContent = '🚀 START ROLLING';
                     return;
@@ -185,13 +179,13 @@
                 const winner = leads[winnerIndex];
 
                 const winnerName = winner.full_name || 'Anonymous';
-                const winnerCompany = winner.company ? winner.company : 'Independent / No Company';
+                const winnerCompany = winner.company ? winner.company : '';
 
                 // Snap ticker to show winning name and company
                 track.innerHTML = `
                     <div class="ticker-item">
                         <div class="text-3xl font-black text-green-400">⭐ ${winnerName} ⭐</div>
-                        <div class="text-lg font-medium text-gray-200 mt-1">${winner.company || ''}</div>
+                        <div class="text-lg font-medium text-gray-200 mt-1">${winnerCompany}</div>
                     </div>
                 `;
                 track.style.transform = `translateY(0px)`;
