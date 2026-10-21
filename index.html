@@ -81,16 +81,15 @@
             const duplicateMsg = document.getElementById('duplicateMessage');
             duplicateMsg.classList.add('hidden');
 
-            // --- 16:00 TIME CHECK ---
+            // --- 06:00 to 16:00 TIME WINDOW CHECK ---
             const now = new Date();
             const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
 
-            if (currentHour > 16 || (currentHour === 16 && currentMinute >= 0)) {
-                alert("⏰ Today's prize draw has closed! Entries are only accepted until 16:00. Please join us again tomorrow!");
+            if (currentHour < 6 || currentHour >= 16) {
+                alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 16:00 daily. Please try again during opening hours.");
                 return;
             }
-            // ------------------------
+            // ----------------------------------------
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'Checking entry...';
