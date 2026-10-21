@@ -93,7 +93,7 @@
             const now = new Date();
             const currentHour = now.getHours();
 
-            if (currentHour < 6 || currentHour >= 18) {
+            if (currentHour < 6 || currentHour >= 16) {
                 alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 18:00 daily. Please try again during opening hours.");
                 return;
             }
@@ -101,7 +101,7 @@
 
             // --- STAFF PIN VALIDATION ---
             const staffPin = document.getElementById('staffPin').value.trim();
-            const CORRECT_PIN = "1234"; // <-- CHANGE THIS TO YOUR DESIRED PIN
+            const CORRECT_PIN = "7722"; // <-- CHANGE THIS TO YOUR DESIRED PIN
 
             if (staffPin !== CORRECT_PIN) {
                 alert("❌ Invalid Staff PIN! Please have a staff member enter the correct PIN.");
