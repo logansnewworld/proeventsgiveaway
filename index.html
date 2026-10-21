@@ -92,7 +92,7 @@
             const now = new Date();
             const currentHour = now.getHours();
 
-            if (currentHour < 6 || currentHour >= 16) {
+            if (currentHour < 6 || currentHour >= 23) {
                 alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 16:00 daily. Please try again during opening hours.");
                 return;
             }
