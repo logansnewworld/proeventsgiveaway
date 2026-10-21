@@ -81,16 +81,32 @@
             const duplicateMsg = document.getElementById('duplicateMessage');
             duplicateMsg.classList.add('hidden');
 
+            // --- 16:00 TIME CHECK ---
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            if (currentHour > 16 || (currentHour === 16 && currentMinute >= 0)) {
+                alert("⏰ Today's prize draw has closed! Entries are only accepted until 16:00. Please join us again tomorrow!");
+                return;
+            }
+            // ------------------------
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Checking entry...';
 
             const emailInput = document.getElementById('email').value.trim().toLowerCase();
             const phoneInput = document.getElementById('phone').value.trim();
 
+            // Get today's date in YYYY-MM-DD format for daily duplicate validation
+            const today = now.toISOString().split('T')[0];
+
             try {
+                // Check for duplicates ONLY created today
                 const { data: existingEntries } = await supabaseClient
                     .from('expo_leads')
                     .select('id')
+                    .gte('created_at', `${today}T00:00:00`)
                     .or(`email.ilike.${emailInput},phone.eq.${phoneInput}`);
 
                 if (existingEntries && existingEntries.length > 0) {
