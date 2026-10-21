@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expo Lead Capture & Prize Draw</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Updated to latest supabase-js to fully support publishable keys -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
@@ -15,12 +16,12 @@
         <div class="text-center mb-6">
             <img src="logo.png" alt="Company Logo" class="mx-auto h-16 object-contain mb-3">
             <h2 class="text-2xl font-bold text-gray-800 mb-1">Welcome to Our Stand!</h2>
-            <p class="text-gray-600 text-sm">By completing this questionare you are automatically entered into today's prize draw.</p>
+            <p class="text-gray-600 text-sm">By completing this questionnaire you are automatically entered into today's prize draw.</p>
         </div>
 
         <!-- Duplicate Warning Message Banner -->
         <div id="duplicateMessage" class="hidden mb-4 p-4 bg-amber-100 border border-amber-300 text-amber-800 rounded-md text-center font-medium">
-            ⚠️ Draw entry already submitted!
+            ⚠️ Draw entry already submitted today!
         </div>
 
         <form id="leadForm" class="space-y-4">
@@ -54,6 +55,13 @@
                 <input type="text" id="interests" required placeholder="e.g. Security, IT, Mining..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            <!-- Staff PIN Field (Hand device to staff member) -->
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-md space-y-2">
+                <label for="staffPin" class="block text-sm font-bold text-blue-900">🔒 Staff Verification PIN *</label>
+                <p class="text-xs text-blue-700">Please hand device to a staff member to enter the authorization PIN and complete submission.</p>
+                <input type="password" id="staffPin" required placeholder="Enter staff PIN" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
             <!-- Confidentiality Disclaimer -->
             <p class="text-xs text-gray-500 text-center leading-relaxed">
                 🔒 Your information is strictly confidential and will be used solely for this prize draw and internal follow-up. It will never be shared with third parties.
@@ -81,15 +89,26 @@
             const duplicateMsg = document.getElementById('duplicateMessage');
             duplicateMsg.classList.add('hidden');
 
-            // --- 06:00 to 16:00 TIME WINDOW CHECK ---
+            // --- 06:00 to 18:00 TIME WINDOW CHECK ---
             const now = new Date();
             const currentHour = now.getHours();
 
-            if (currentHour < 6 || currentHour >= 16) {
-                alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 16:00 daily. Please try again during opening hours.");
+            if (currentHour < 6 || currentHour >= 18) {
+                alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 18:00 daily. Please try again during opening hours.");
                 return;
             }
             // ----------------------------------------
+
+            // --- STAFF PIN VALIDATION ---
+            const staffPin = document.getElementById('staffPin').value.trim();
+            const CORRECT_PIN = "1234"; // <-- CHANGE THIS TO YOUR DESIRED PIN
+
+            if (staffPin !== CORRECT_PIN) {
+                alert("❌ Invalid Staff PIN! Please have a staff member enter the correct PIN.");
+                document.getElementById('staffPin').value = ''; 
+                return;
+            }
+            // ----------------------------
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'Checking entry...';
@@ -109,15 +128,17 @@
                     .or(`email.ilike.${emailInput},phone.eq.${phoneInput}`);
 
                 if (existingEntries && existingEntries.length > 0) {
+                    duplicateMsg.textContent = "⚠️ Draw entry already submitted today!";
                     duplicateMsg.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit & Enter Draw';
+                    document.getElementById('staffPin').value = '';
                     return;
                 }
 
                 submitBtn.textContent = 'Submitting...';
 
-                // Mapped precisely to your Supabase columns (including new 'designation')
+                // Mapped precisely to your Supabase columns
                 const formData = {
                     full_name: document.getElementById('fullName').value.trim(),
                     designation: document.getElementById('designation').value.trim(),
@@ -133,6 +154,7 @@
                     alert('Error submitting form: ' + insertError.message);
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit & Enter Draw';
+                    document.getElementById('staffPin').value = '';
                 } else {
                     document.getElementById('leadForm').reset();
                     document.getElementById('leadForm').classList.add('hidden');
@@ -143,6 +165,7 @@
                 alert('An error occurred: ' + err.message);
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit & Enter Draw';
+                document.getElementById('staffPin').value = '';
             }
         });
     </script>
