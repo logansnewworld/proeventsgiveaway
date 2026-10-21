@@ -54,12 +54,6 @@
                 <input type="text" id="interests" required placeholder="e.g. Security, IT, Mining..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
-            <!-- Staff PIN Field -->
-            <div>
-                <label for="staffPin" class="block text-sm font-medium text-gray-700">Staff PIN Code *</label>
-                <input type="password" id="staffPin" required placeholder="Ask staff to enter pin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-
             <!-- Confidentiality Disclaimer -->
             <p class="text-xs text-gray-500 text-center leading-relaxed">
                 🔒 Your information is strictly confidential and will be used solely for this prize draw and internal follow-up. It will never be shared with third parties.
@@ -91,21 +85,23 @@
             const now = new Date();
             const currentHour = now.getHours();
 
-            if (currentHour < 6 || currentHour >= 23) {
+            if (currentHour < 6 || currentHour >= 16) {
                 alert("⏰ Today's prize draw is currently closed! Entries are only accepted between 06:00 and 16:00 daily. Please try again during opening hours.");
                 return;
             }
             // ----------------------------------------
 
-            // --- STAFF PIN VALIDATION ---
-            const staffPin = document.getElementById('staffPin').value.trim();
-            const CORRECT_PIN = "7200"; // <-- CHANGE THIS TO YOUR DESIRED PIN
+            // Get today's date in YYYY-MM-DD format
+            const today = now.toISOString().split('T')[0];
 
-            if (staffPin !== CORRECT_PIN) {
-                alert("❌ Invalid Staff PIN! Please check with expo staff.");
+            // --- BROWSER DEVICE LOCK CHECK ---
+            const deviceSubmitted = localStorage.getItem(`expo_submitted_${today}`);
+            if (deviceSubmitted) {
+                duplicateMsg.textContent = "⚠️ This device has already submitted an entry for today's draw!";
+                duplicateMsg.classList.remove('hidden');
                 return;
             }
-            // ----------------------------
+            // ---------------------------------
 
             submitBtn.disabled = true;
             submitBtn.textContent = 'Checking entry...';
@@ -113,11 +109,8 @@
             const emailInput = document.getElementById('email').value.trim().toLowerCase();
             const phoneInput = document.getElementById('phone').value.trim();
 
-            // Get today's date in YYYY-MM-DD format for daily duplicate validation
-            const today = now.toISOString().split('T')[0];
-
             try {
-                // Check for duplicates ONLY created today
+                // Check for database duplicates created today (by email or phone)
                 const { data: existingEntries } = await supabaseClient
                     .from('expo_leads')
                     .select('id')
@@ -125,6 +118,7 @@
                     .or(`email.ilike.${emailInput},phone.eq.${phoneInput}`);
 
                 if (existingEntries && existingEntries.length > 0) {
+                    duplicateMsg.textContent = "⚠️ Draw entry already submitted!";
                     duplicateMsg.classList.remove('hidden');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit & Enter Draw';
@@ -150,6 +144,9 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit & Enter Draw';
                 } else {
+                    // Lock this device for the rest of today
+                    localStorage.setItem(`expo_submitted_${today}`, 'true');
+
                     document.getElementById('leadForm').reset();
                     document.getElementById('leadForm').classList.add('hidden');
                     document.getElementById('successMessage').classList.remove('hidden');
