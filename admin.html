@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expo Admin - Prize Ticker Tube</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Updated to latest supabase-js to fully support publishable keys -->
@@ -32,19 +33,24 @@
             padding: 0 20px;
             text-align: center;
         }
+        /* Optimized touch handling for mobile devices */
+        #actionBtn, button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white min-h-screen p-6 flex flex-col items-center justify-between relative">
     
     <!-- Fullscreen Toggle Button -->
-    <button onclick="toggleFullscreen()" class="fixed top-4 right-4 bg-gray-800 hover:bg-gray-700 text-yellow-400 font-bold py-2 px-4 rounded-lg border border-yellow-500 shadow-lg transition z-50">
+    <button id="fullscreenBtn" class="fixed top-4 right-4 bg-gray-800 hover:bg-gray-700 text-yellow-400 font-bold py-2 px-4 rounded-lg border border-yellow-500 shadow-lg transition z-50">
         ⛶ Fullscreen
     </button>
 
     <!-- Header Section -->
     <div class="flex flex-col items-center">
         <img src="logo.png" alt="Company Logo" class="h-20 object-contain mb-2 drop-shadow-md">
-        <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2">
+        <h1 class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent mb-2 text-center">
             GRAND PRIZE TICKER TUBE
         </h1>
     </div>
@@ -58,8 +64,8 @@
         </div>
     </div>
 
-    <!-- Action Button -->
-    <button id="actionBtn" onclick="toggleSpin()" class="bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 hover:from-yellow-300 hover:to-amber-500 text-black font-black text-2xl py-4 px-12 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition transform hover:scale-105 active:scale-95 border-2 border-yellow-200 mb-4">
+    <!-- Action Button with Instant Touch Support -->
+    <button id="actionBtn" class="bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-600 hover:from-yellow-300 hover:to-amber-500 text-black font-black text-2xl py-4 px-12 rounded-full shadow-[0_10px_25px_rgba(245,158,11,0.4)] transition transform hover:scale-105 active:scale-95 border-2 border-yellow-200 mb-4 cursor-pointer select-none">
         🚀 START ROLLING
     </button>
 
@@ -78,6 +84,11 @@
                 document.exitFullscreen();
             }
         }
+
+        document.getElementById('fullscreenBtn').addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            toggleFullscreen();
+        });
 
         const SUPABASE_URL = 'https://kvweqztviovppnuniqpu.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_bCHzdDByUR1IX7RmqpMGqQ_w5ewnov1';
@@ -198,6 +209,12 @@
                 }, 600);
             }
         }
+
+        // Attach instant pointerdown event for immediate touch/mouse response
+        document.getElementById('actionBtn').addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            toggleSpin();
+        });
     </script>
 </body>
 </html>
