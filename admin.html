@@ -78,11 +78,37 @@
 
     <script>
         function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => alert(err.message));
-            } else if (document.exitFullscreen) {
-                document.exitFullscreen();
+            const docEl = document.documentElement;
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(err => {
+                        console.log("Fullscreen request blocked/unsupported:", err.message);
+                        activateMobileFullscreenFallback();
+                    });
+                } else if (docEl.webkitRequestFullscreen) {
+                    docEl.webkitRequestFullscreen();
+                } else {
+                    activateMobileFullscreenFallback();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else {
+                    deactivateMobileFullscreenFallback();
+                }
             }
+        }
+
+        function activateMobileFullscreenFallback() {
+            document.body.classList.toggle('scale-105');
+            alert("💡 Tip for iPhone/iPad: Tap the Share button in Safari and select 'Add to Home Screen' to launch this admin dashboard in true fullscreen mode!");
+        }
+
+        function deactivateMobileFullscreenFallback() {
+            document.body.classList.remove('scale-105');
         }
 
         document.getElementById('fullscreenBtn').addEventListener('pointerdown', (e) => {
